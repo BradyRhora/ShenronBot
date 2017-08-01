@@ -21,18 +21,7 @@ namespace ShenronBot
             emb.Author.Name = "Shenron Commands";
             emb.ThumbnailUrl = Context.User.AvatarId;
             emb.ColorStripe = Constants.Colours.SHENRON_GREEN;
-
-            /*
-            for (int i = 0; i < helpFields.Count(); i += 2)
-                emb.Fields.Add(new JEmbedField(x =>
-                {
-                    x.Header = helpFields[i];
-                    x.Text = helpFields[i + 1];
-                }));
-             */
-
-
-            //TEST ME GOOD!
+            
             foreach(CommandInfo command in Bot.commands.Commands)
             {
                 emb.Fields.Add(new JEmbedField(x =>
@@ -167,6 +156,27 @@ namespace ShenronBot
             }
         }
 
+        [Command("initialize"), Alias("init")]
+        public async Task Initialize()
+        {
+            IRole human = Context.Guild.GetRole(Constants.Roles.HUMAN[0]);
+            IRole saiyan = Context.Guild.GetRole(Constants.Roles.SAIYAN[0]);
+            IRole namekian = Context.Guild.GetRole(Constants.Roles.NAMEKIAN[0]);
+
+            IGuild namek = Bot.client.GetGuild(Constants.Guilds.DBZ_NAMEK);
+            IGuild vegeta = Bot.client.GetGuild(Constants.Guilds.DBZ_VEGETA);
+
+            await namek.CreateRoleAsync(saiyan.Name, saiyan.Permissions, saiyan.Color, saiyan.IsHoisted);
+            await vegeta.CreateRoleAsync(saiyan.Name, saiyan.Permissions, saiyan.Color, saiyan.IsHoisted);
+
+            await namek.CreateRoleAsync(human.Name, human.Permissions, human.Color, human.IsHoisted);
+            await vegeta.CreateRoleAsync(human.Name, human.Permissions, human.Color, human.IsHoisted);
+            
+            await namek.CreateRoleAsync(namekian.Name, namekian.Permissions, namekian.Color, namekian.IsHoisted);
+            await vegeta.CreateRoleAsync(namekian.Name, namekian.Permissions, namekian.Color, namekian.IsHoisted);
+
+            await Context.Channel.SendMessageAsync("Done");
+        }
 
         Color GetColor(IUser User)
         {

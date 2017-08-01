@@ -14,7 +14,7 @@ namespace ShenronBot
             public static ulong DBZ_NAMEK = 341819718694600708;
             public static ulong DBZ_VEGETA = 341819801603276801;
         }
-        
+
         public class Users
         {
             public static ulong BRADY = 108312797162541056;
@@ -23,9 +23,14 @@ namespace ShenronBot
 
         public class Roles
         {
-            public static ulong SAIYAN = 000000000000000000;
-            public static ulong HUMAN = 000000000000000000;
-            public static ulong NAMEKIAN = 000000000000000000;
+            //Earth, Namek, Vegeta.
+            public static ulong[] SAIYAN = { 342060192944619520 };
+            public static ulong[] HUMAN = { 342060189387587594 };
+            public static ulong[] NAMEKIAN = { 342060191518425088 };
+
+            public static ulong[] ON_EARTH = { 342063065824755712 };
+            public static ulong[] ON_NAMEK = { 000000000000000000 };
+            public static ulong[] ON_VEGETA = { 000000000000000000 };
         }
 
         public class Colours

@@ -78,7 +78,7 @@ namespace ShenronBot
             if (message == null) return;
             int argPos = 0;
 
-            if (message.HasStringPrefix("!db", ref argPos))
+            if (message.HasStringPrefix("db!", ref argPos))
             {
 
                 var context = new CommandContext(client, message);
