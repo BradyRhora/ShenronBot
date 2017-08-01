@@ -23,7 +23,6 @@ namespace ShenronBot
 
         public class Roles
         {
-<<<<<<< HEAD
             //Earth, Namek, Vegeta.
             public static ulong[] SAIYAN = { 342060192944619520 };
             public static ulong[] HUMAN = { 342060189387587594 };
@@ -32,15 +31,6 @@ namespace ShenronBot
             public static ulong[] ON_EARTH = { 342063065824755712 };
             public static ulong[] ON_NAMEK = { 000000000000000000 };
             public static ulong[] ON_VEGETA = { 000000000000000000 };
-=======
-            public static ulong SAIYAN = 000000000000000000;
-            public static ulong HUMAN = 000000000000000000;
-            public static ulong NAMEKIAN = 000000000000000000;
-
-            public static ulong EARTH = 000000000000000000;
-            public static ulong NAMEK = 000000000000000000;
-            public static ulong VEGETA = 000000000000000000;
->>>>>>> origin/master
         }
 
         public class Colours

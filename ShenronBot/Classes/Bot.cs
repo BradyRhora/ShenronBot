@@ -78,13 +78,10 @@ namespace ShenronBot
             var message = messageParam as SocketUserMessage;
             if (message == null) return;
             int argPos = 0;
-
-<<<<<<< HEAD:ShenronBot/Bot.cs
+            
             if (message.HasStringPrefix("db!", ref argPos))
-=======
             //changed prefix to db! because even though bot is called shenron, its more DB in general.
-            if (message.HasStringPrefix("db!", ref argPos)) 
->>>>>>> origin/master:ShenronBot/Classes/Bot.cs
+            if (message.HasStringPrefix("db!", ref argPos))
             {
 
                 var context = new CommandContext(client, message);

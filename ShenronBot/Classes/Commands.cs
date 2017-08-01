@@ -18,14 +18,10 @@ namespace ShenronBot
             JEmbed emb = new JEmbed();
             emb.Author.Name = "Shenron Commands";
             emb.ThumbnailUrl = Context.User.AvatarId;
-<<<<<<< HEAD:ShenronBot/Commands.cs
             emb.ColorStripe = Constants.Colours.SHENRON_GREEN;
-            
-=======
-            //emb.ColorStripe = Constants.Colours.SHENRON_GREEN;
-            emb.ColorStripe = Funcs.GetColour(Context.User, Context.Guild);
 
->>>>>>> origin/master:ShenronBot/Classes/Commands.cs
+            emb.ColorStripe = Funcs.GetColour(Context.User, Context.Guild);
+            
             foreach(CommandInfo command in Bot.commands.Commands)
             {
                 emb.Fields.Add(new JEmbedField(x =>
