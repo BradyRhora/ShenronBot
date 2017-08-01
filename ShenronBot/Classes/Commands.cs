@@ -15,24 +15,12 @@ namespace ShenronBot
         [Command("help"), Summary("Displays commands and descriptions.")]
         public async Task Help()
         {
-            string[] helpFields = File.ReadAllLines(@"Constants\help.txt");
-
             JEmbed emb = new JEmbed();
             emb.Author.Name = "Shenron Commands";
             emb.ThumbnailUrl = Context.User.AvatarId;
-            emb.ColorStripe = Constants.Colours.SHENRON_GREEN;
+            //emb.ColorStripe = Constants.Colours.SHENRON_GREEN;
+            emb.ColorStripe = Funcs.GetColour(Context.User, Context.Guild);
 
-            /*
-            for (int i = 0; i < helpFields.Count(); i += 2)
-                emb.Fields.Add(new JEmbedField(x =>
-                {
-                    x.Header = helpFields[i];
-                    x.Text = helpFields[i + 1];
-                }));
-             */
-
-
-            //TEST ME GOOD!
             foreach(CommandInfo command in Bot.commands.Commands)
             {
                 emb.Fields.Add(new JEmbedField(x =>
@@ -40,7 +28,7 @@ namespace ShenronBot
                     string header = command.Name;
                     foreach (ParameterInfo parameter in command.Parameters)
                     {
-                        header += "[" + parameter.Name + "] ";
+                        header += " [" + parameter.Name + "]";
                     }
                     x.Header = header;
                     x.Text = command.Summary;
@@ -54,19 +42,25 @@ namespace ShenronBot
         [Command("register"), Summary("Use this to register!")]
         public async Task Register(string race)
         {
-            if (PlayerRegistered(Context.User)) await Context.Channel.SendMessageAsync($"{Context.User.Mention} has already registered.");
-            else
+            race = race.ToLower();
+            if (DBFuncs.PlayerRegistered(Context.User)) await Context.Channel.SendMessageAsync($"{Context.User.Mention} has already registered.");
+            else if (race == "human" || race == "saiyan" || race == "namekian")
             {
-                File.Create($@"Players\{Context.User.Id}.txt");
-                string[] toWrite = new string[2];
-                race = race.ToLower();
-                if (race == "human" || race == "saiyan" || race == "namekian") toWrite[0] = $"RACE: {race}";
-                toWrite[1] = "POWER_LVL: 10";
+                Player.Race wRace = Player.Race.Human;
+                if (race == "human") wRace = Player.Race.Human;
+                else if (race == "saiyan") wRace = Player.Race.Saiyan;
+                else if (race == "namekian") wRace = Player.Race.Namekian;
+
+                string[] toWrite = new string[3];
+                toWrite[0] = Context.User.Username;
+                toWrite[1] = $"RACE: {wRace}";
+                toWrite[2] = "POWER_LVL: 10";
 
                 File.WriteAllLines($@"Players\{Context.User.Id}.txt", toWrite);
 
-                await Context.Channel.SendMessageAsync($"{Context.User.Username} has successfully registered as a {race[0].ToString().ToUpper() + race.Substring(1)}");
+                await Context.Channel.SendMessageAsync($"{Context.User.Mention} has successfully registered as a {race[0].ToString().ToUpper() + race.Substring(1)}.");
             }
+            else await Context.Channel.SendMessageAsync("Please choose a race. `db!register [race]`");
         }
 
         [Command("start"), Summary("Starts a new Dragon Ball Session. Can only be done by GM.")]
@@ -168,18 +162,6 @@ namespace ShenronBot
         }
 
 
-        Color GetColor(IUser User)
-        {
-            var user = User as IGuildUser;
-
-            if (user.RoleIds.ToArray().Count() > 1)
-            {
-                var role = Context.Guild.GetRole(user.RoleIds.ElementAtOrDefault(1));
-                return role.Color;
-            }
-            else return Constants.Colours.DEFAULT_COLOUR;
-        }
-
         DBUser FindDBUser(IUser user)
         {
             int count = 0;
@@ -191,25 +173,6 @@ namespace ShenronBot
                 if (count == 5 || count == 20 || count == 100) Console.WriteLine("Something is wrong with FindDBuser()!");
             }
 
-        }
-
-        string GetAttribute(IUser user, string attributeToGet)
-        {
-            string[] attributes = File.ReadAllLines($@"Players\{user.Id}.txt");
-            foreach(string attribute in attributes)
-            {
-                if (attribute.StartsWith(attributeToGet))
-                {
-                    return attribute.Substring(attributeToGet.Length + 2);
-                }
-            }
-            return "";
-        }
-
-        bool PlayerRegistered(IUser user)
-        {
-            if (File.Exists($@"Players\{user.Id}.txt")) return true;
-            else return false;
         }
 
 

@@ -26,6 +26,10 @@ namespace ShenronBot
             public static ulong SAIYAN = 000000000000000000;
             public static ulong HUMAN = 000000000000000000;
             public static ulong NAMEKIAN = 000000000000000000;
+
+            public static ulong EARTH = 000000000000000000;
+            public static ulong NAMEK = 000000000000000000;
+            public static ulong VEGETA = 000000000000000000;
         }
 
         public class Colours
