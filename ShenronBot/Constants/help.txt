@@ -1,0 +1,4 @@
+﻿s!help
+Shows this menu.
+s!dragonball (command)
+Type s!help dragonball for commands. Alias: s!db
