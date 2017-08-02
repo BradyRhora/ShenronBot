@@ -1,0 +1,3 @@
+Brady
+RACE: Saiyan
+POWER_LVL: 10

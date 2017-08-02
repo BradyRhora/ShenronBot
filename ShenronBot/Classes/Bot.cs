@@ -79,15 +79,17 @@ namespace ShenronBot
             if (message == null) return;
             int argPos = 0;
             
-            if (message.HasStringPrefix("db!", ref argPos))
             //changed prefix to db! because even though bot is called shenron, its more DB in general.
             if (message.HasStringPrefix("db!", ref argPos))
             {
-
-                var context = new CommandContext(client, message);
-                var result = await commands.ExecuteAsync(context, argPos);
-                if (!result.IsSuccess)
-                    Console.WriteLine(result.ErrorReason);
+                if (DBFuncs.PlayerRegistered(message.Author) || message.Content.StartsWith("db!register"))
+                {
+                    var context = new CommandContext(client, message);
+                    var result = await commands.ExecuteAsync(context, argPos);
+                    if (!result.IsSuccess)
+                        Console.WriteLine(result.ErrorReason);
+                }
+                else await message.Channel.SendMessageAsync($"{message.Author.Mention}, you must register with `db!register` before using commands.");
             }
             else return;
         }
@@ -99,11 +101,6 @@ namespace ShenronBot
      * Can no longer communicate in other DBZ servers?
      * DBUser compatible with Player\ files?
      * Change server names from DBZ to DB.
-     * UPLOAD TO GITHUB?
-     * Worry about the fact that GitHub will be public.
-     * Cry?
-     * ???
-     * Profit.
      * Powering up. EXP System? Levels? Just Power level?
      * Saiyans:
      *      Saiyan
@@ -125,10 +122,6 @@ namespace ShenronBot
      * Basically fuckin Xenoverse TBH but more dragon ball focused.
      * Are items necessary? We'll see. def not first priority.
      * Obv current fighting system is NOT final.
-     * 
-     * Alright, time to sleep. Gotta get up in ~6 hours. Godspeed, future Brady.
-     * (((TIME TRAVEL?????)))
-     * Anywa- FUCK MORE IDEAS.
      * 
      * Enemies? (Vegeta, Freiza, Cell, Buu, Goku??, etc.)
      * While we're on the thought of fighting Goku... NPCs?
@@ -172,5 +165,11 @@ namespace ShenronBot
      * join and help me test. Entering subway station now.
      * 
      * At subway. 15 minutes until bus approximately. No WiFi available. Let's see if there's anything I can do.
+     * 
+     *          (8/2/2017 12:42 AM) In Andrew's Bed.
+     *          
+     * Josh is on top of me. Going to implement some ideas.
+     * 
+     * 
      */
 }

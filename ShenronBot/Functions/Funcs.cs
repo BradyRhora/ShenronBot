@@ -21,5 +21,11 @@ namespace ShenronBot
             else return Constants.Colours.DEFAULT_COLOUR;
         }
 
+        public static bool IsAdmin(IUser user)
+        {
+            var gUser = user as IGuildUser;
+            if (user.Id == Constants.Users.BRADY || gUser.RoleIds.Contains(Constants.Roles.ADMIN)) return true;
+            else return false;
+        }
     }
 }

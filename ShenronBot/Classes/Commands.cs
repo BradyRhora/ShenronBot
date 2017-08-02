@@ -26,7 +26,7 @@ namespace ShenronBot
             {
                 emb.Fields.Add(new JEmbedField(x =>
                 {
-                    string header = command.Name;
+                    string header = "db!" + command.Name;
                     foreach (ParameterInfo parameter in command.Parameters)
                     {
                         header += " [" + parameter.Name + "]";
@@ -48,9 +48,56 @@ namespace ShenronBot
             else if (race == "human" || race == "saiyan" || race == "namekian")
             {
                 Player.Race wRace = Player.Race.Human;
-                if (race == "human") wRace = Player.Race.Human;
-                else if (race == "saiyan") wRace = Player.Race.Saiyan;
-                else if (race == "namekian") wRace = Player.Race.Namekian;
+                string planet = "";
+                
+                if (race == "human")
+                {
+                    wRace = Player.Race.Human;
+                    planet = "Earth: https://discord.gg/UwDKgAF";
+                    var guild = Bot.client.GetGuild(Constants.Guilds.DBZ_EARTH);
+                    var gUser = guild.GetUser(Context.User.Id);
+                    await gUser.AddRoleAsync(guild.GetRole(Constants.Roles.ON_EARTH));
+
+                    for (int i = 0; i < 3; i++)
+                    {
+                        var rGuild = Bot.client.GetGuild(Constants.Guilds.PLANETS[i]);
+                        var rRole = rGuild.GetRole(Constants.Roles.HUMAN[i]);
+                        var rUser = rGuild.GetUser(Context.User.Id);
+                        await rUser.AddRoleAsync(rRole);
+                    }
+                }
+                else if (race == "saiyan")
+                {
+                    wRace = Player.Race.Saiyan;
+                    planet = "Vegeta: https://discord.gg/vFaS8u2";
+                    var guild = Bot.client.GetGuild(Constants.Guilds.DBZ_VEGETA);
+                    var gUser = guild.GetUser(Context.User.Id);
+                    await gUser.AddRoleAsync(guild.GetRole(Constants.Roles.ON_VEGETA));
+
+                    for (int i = 0; i < 3; i++)
+                    {
+                        var rGuild = Bot.client.GetGuild(Constants.Guilds.PLANETS[i]);
+                        var rRole = rGuild.GetRole(Constants.Roles.SAIYAN[i]);
+                        var rUser = rGuild.GetUser(Context.User.Id);
+                        await rUser.AddRoleAsync(rRole);
+                    }
+                }
+                else if (race == "namekian")
+                {
+                    wRace = Player.Race.Namekian;
+                    planet = "Namek: https://discord.gg/tJVfgms";
+                    var guild = Bot.client.GetGuild(Constants.Guilds.DBZ_NAMEK);
+                    var gUser = guild.GetUser(Context.User.Id);
+                    await gUser.AddRoleAsync(guild.GetRole(Constants.Roles.ON_NAMEK));
+
+                    for (int i = 0; i < 3; i++)
+                    {
+                        var rGuild = Bot.client.GetGuild(Constants.Guilds.PLANETS[i]);
+                        var rRole = rGuild.GetRole(Constants.Roles.NAMEKIAN[i]);
+                        var rUser = rGuild.GetUser(Context.User.Id);
+                        await rUser.AddRoleAsync(rRole);
+                    }
+                }
 
                 string[] toWrite = new string[3];
                 toWrite[0] = Context.User.Username;
@@ -58,18 +105,22 @@ namespace ShenronBot
                 toWrite[2] = "POWER_LVL: 10";
 
                 File.WriteAllLines($@"Players\{Context.User.Id}.txt", toWrite);
+                
 
                 await Context.Channel.SendMessageAsync($"{Context.User.Mention} has successfully registered as a {race[0].ToString().ToUpper() + race.Substring(1)}.");
             }
-            else await Context.Channel.SendMessageAsync("Please choose a race. `db!register [race]`");
+            else await Context.Channel.SendMessageAsync("Please choose either Human, Saiyan, or Namekian as your race. `db!register [race]`");
         }
 
         [Command("start"), Summary("Starts a new Dragon Ball Session. Can only be done by GM.")]
         public async Task Start()
         {
-            Bot.sess = new DBSession();
-            Bot.sess.LaunchBalls();
-            await Context.Channel.SendMessageAsync("Seven Dragon Balls ascend and launch through the sky in different directions.");
+            if (Context.User.Id == Constants.Users.BRADY)
+            {
+                Bot.sess = new DBSession();
+                Bot.sess.LaunchBalls();
+                await Context.Channel.SendMessageAsync("Seven Dragon Balls ascend and launch through the sky in different directions.");
+            }
         }
 
         [Command("pickup"), Alias("pu"), Summary("Picks up any Dragon Balls that are in the current area.")]
@@ -87,6 +138,8 @@ namespace ShenronBot
                     Console.WriteLine($"{Context.User.Username} has picked up the { Bot.sess.Balls[i].ID} star Dragon Ball in {Context.Channel.Name} of {Context.Guild.Name}.");
                     Bot.sess.Balls[i].Holder = Context.User;
                     Bot.sess.Balls[i].Held = true;
+                    await Bot.sess.Balls[i].Msg1.DeleteAsync();
+                    await Bot.sess.Balls[i].Msg2.DeleteAsync();
                 }
             }
         }
@@ -183,6 +236,24 @@ namespace ShenronBot
 
             await Context.Channel.SendMessageAsync("Done");
         }
+
+        [Command("purge")]
+        public async Task Purge(int amount)
+        {
+            
+            var messages = await Context.Channel.GetMessagesAsync(amount + 1).Flatten();
+            await Context.Channel.DeleteMessagesAsync(messages);
+
+            JEmbed embed = new JEmbed();
+            embed.Title = "Messages deleted.";
+            embed.Description = $"{amount} messages deleted.";
+            embed.ColorStripe = Constants.Colours.SHENRON_GREEN;
+            var emb = embed.Build();
+            var msg = await Context.Channel.SendMessageAsync("", embed: emb);
+            Thread.Sleep(2000);
+            await msg.DeleteAsync();
+        }
+        
 
         DBUser FindDBUser(IUser user)
         {

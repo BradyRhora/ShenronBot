@@ -30,20 +30,19 @@ namespace ShenronBot
                 var guild = guilds[rdm.Next(guilds.Length)];
                 var chans = await guild.GetTextChannelsAsync();
                 ITextChannel chan;
-                /* Blocked Channel Check
                 while (true)
-                {*/
+                {
                     int chanNum = rdm.Next(chans.Count);
                     chan = chans.ElementAt(chanNum);
-                    /*bool no = false;
-                    for (int a = 0; a < Constants.BLOCKED_CHANNELS.Count(); a++)
+                    bool no = false;
+                    for (int a = 0; a < Constants.Channels.BLOCKED_CHANNELS.Count(); a++)
                     {
-                        if (Constants.BLOCKED_CHANNELS[a] == (chan.Id)) no = true;
+                        if (Constants.Channels.BLOCKED_CHANNELS[a] == (chan.Id)) no = true;
                     }
 
 
                     if (!no) break;
-                }*/
+                }
                 Balls[i] = new DragonBall(chan, i + 1);
             }
         }
