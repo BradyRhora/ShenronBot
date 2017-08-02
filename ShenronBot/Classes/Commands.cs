@@ -107,7 +107,7 @@ namespace ShenronBot
                 File.WriteAllLines($@"Players\{Context.User.Id}.txt", toWrite);
                 
 
-                await Context.Channel.SendMessageAsync($"{Context.User.Mention} has successfully registered as a {race[0].ToString().ToUpper() + race.Substring(1)}.");
+                await Context.Channel.SendMessageAsync($"{Context.User.Mention} has successfully registered as a {wRace}. Go forth to Planet {planet}.");
             }
             else await Context.Channel.SendMessageAsync("Please choose either Human, Saiyan, or Namekian as your race. `db!register [race]`");
         }
