@@ -40,6 +40,7 @@ namespace ShenronBot
                 // Connect the client to Discord's gateway
                 await client.StartAsync();
                 Console.WriteLine("Shenron successfully intialized");
+                //var expTimer = new Timer(ExpTimer, null, 0, 60 * 1000);
                 // Block this task until the program is exited.
                 await Task.Delay(-1);
             }
@@ -69,6 +70,7 @@ namespace ShenronBot
         {
             // Hook the MessageReceived Event into our Command Handler
             client.MessageReceived += HandleCommand;
+            client.UserJoined += HandleJoin;
             // Discover all of the commands in this assembly and load them.
             await commands.AddModulesAsync(Assembly.GetEntryAssembly());
         }
@@ -93,6 +95,41 @@ namespace ShenronBot
             }
             else return;
         }
+
+        public async Task HandleJoin(SocketGuildUser user)
+        {
+            ulong ID = user.Guild.Id;
+
+            IChannel chan = user.Guild.GetChannel(Constants.Channels.EARTH_GEN);
+            if (ID == Constants.Guilds.DBZ_EARTH) chan = user.Guild.GetChannel(Constants.Channels.EARTH_GEN);
+            else if (ID == Constants.Guilds.DBZ_NAMEK) chan = user.Guild.GetChannel(Constants.Channels.NAMEK_GEN);
+            else if (ID == Constants.Guilds.DBZ_VEGETA) chan = user.Guild.GetChannel(Constants.Channels.VEGETA_GEN);
+            var mChan = chan as IMessageChannel;
+            await mChan.SendMessageAsync($"{user.Mention} has entered {user.Guild.Name.Replace("DBZ ", "")}");
+
+            DBFuncs.LoadRoles(user);
+
+        }
+        
+
+        /*async void ExpTimer(Object state)
+        {
+            Console.WriteLine("TIMER");
+            foreach (ulong guildID in Constants.Guilds.PLANETS)
+            {
+                IGuild guild = null;
+
+                while (guild == null) guild = client.GetGuild(guildID) as IGuild;
+                foreach (IUser user in await guild.GetUsersAsync())
+                {
+                    if (DBFuncs.PlayerRegistered(user))
+                    {
+                        int newEXP = Convert.ToInt32(DBFuncs.GetAttribute("EXP", user) + 10);
+                        DBFuncs.SetAttribute("EXP", user, Convert.ToString(newEXP));
+                    }
+                }
+            }
+        }*/
     }
 
     ///Late Night THOTS:

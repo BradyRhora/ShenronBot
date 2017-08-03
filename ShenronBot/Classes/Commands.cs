@@ -19,8 +19,6 @@ namespace ShenronBot
             emb.Author.Name = "Shenron Commands";
             emb.ThumbnailUrl = Context.User.AvatarId;
             emb.ColorStripe = Constants.Colours.SHENRON_GREEN;
-
-            emb.ColorStripe = Funcs.GetColour(Context.User, Context.Guild);
             
             foreach(CommandInfo command in Bot.commands.Commands)
             {
@@ -49,62 +47,22 @@ namespace ShenronBot
             {
                 Player.Race wRace = Player.Race.Human;
                 string planet = "";
-                
-                if (race == "human")
-                {
-                    wRace = Player.Race.Human;
-                    planet = "Earth: https://discord.gg/UwDKgAF";
-                    var guild = Bot.client.GetGuild(Constants.Guilds.DBZ_EARTH);
-                    var gUser = guild.GetUser(Context.User.Id);
-                    await gUser.AddRoleAsync(guild.GetRole(Constants.Roles.ON_EARTH));
 
-                    for (int i = 0; i < 3; i++)
-                    {
-                        var rGuild = Bot.client.GetGuild(Constants.Guilds.PLANETS[i]);
-                        var rRole = rGuild.GetRole(Constants.Roles.HUMAN[i]);
-                        var rUser = rGuild.GetUser(Context.User.Id);
-                        await rUser.AddRoleAsync(rRole);
-                    }
-                }
-                else if (race == "saiyan")
-                {
-                    wRace = Player.Race.Saiyan;
-                    planet = "Vegeta: https://discord.gg/vFaS8u2";
-                    var guild = Bot.client.GetGuild(Constants.Guilds.DBZ_VEGETA);
-                    var gUser = guild.GetUser(Context.User.Id);
-                    await gUser.AddRoleAsync(guild.GetRole(Constants.Roles.ON_VEGETA));
+                if (race == "human") { wRace = Player.Race.Human; planet = "Earth: https://discord.gg/UwDKgAF"; }
+                else if (race == "saiyan") { wRace = Player.Race.Saiyan; planet = "Vegeta: https://discord.gg/vFaS8u2"; }
+                else if (race == "namekian") { wRace = Player.Race.Namekian; planet = "Namek: https://discord.gg/tJVfgms"; }
 
-                    for (int i = 0; i < 3; i++)
-                    {
-                        var rGuild = Bot.client.GetGuild(Constants.Guilds.PLANETS[i]);
-                        var rRole = rGuild.GetRole(Constants.Roles.SAIYAN[i]);
-                        var rUser = rGuild.GetUser(Context.User.Id);
-                        await rUser.AddRoleAsync(rRole);
-                    }
-                }
-                else if (race == "namekian")
-                {
-                    wRace = Player.Race.Namekian;
-                    planet = "Namek: https://discord.gg/tJVfgms";
-                    var guild = Bot.client.GetGuild(Constants.Guilds.DBZ_NAMEK);
-                    var gUser = guild.GetUser(Context.User.Id);
-                    await gUser.AddRoleAsync(guild.GetRole(Constants.Roles.ON_NAMEK));
 
-                    for (int i = 0; i < 3; i++)
-                    {
-                        var rGuild = Bot.client.GetGuild(Constants.Guilds.PLANETS[i]);
-                        var rRole = rGuild.GetRole(Constants.Roles.NAMEKIAN[i]);
-                        var rUser = rGuild.GetUser(Context.User.Id);
-                        await rUser.AddRoleAsync(rRole);
-                    }
-                }
-
-                string[] toWrite = new string[3];
+                string[] toWrite = new string[5];
                 toWrite[0] = Context.User.Username;
                 toWrite[1] = $"RACE: {wRace}";
                 toWrite[2] = "POWER_LVL: 10";
+                toWrite[3] = "LEVEL: 1";
+                toWrite[4] = "EXP: 0";
 
                 File.WriteAllLines($@"Players\{Context.User.Id}.txt", toWrite);
+
+                DBFuncs.LoadRoles(Context.User);
                 
 
                 await Context.Channel.SendMessageAsync($"{Context.User.Mention} has successfully registered as a {wRace}. Go forth to Planet {planet}.");
@@ -126,20 +84,22 @@ namespace ShenronBot
         [Command("pickup"), Alias("pu"), Summary("Picks up any Dragon Balls that are in the current area.")]
         public async Task PickUp()
         {
-            FindDBUser(Context.User);
-
-            for (int i = 0; i < 7; i++)
+            var user = DBFuncs.FindDBUser(Context.User);
+            if (!user.IsDead)
             {
-                if (Bot.sess.Balls[i].Location == Context.Channel && Bot.sess.Balls[i].Held == false)
+                for (int i = 0; i < 7; i++)
                 {
-                    await Context.Channel.SendMessageAsync($"{Context.User.Username} collects the {Bot.sess.Balls[i].ID} star Dragon Ball.");
-                    var dbUser = FindDBUser(Context.User);
-                    dbUser.heldBalls.Add(Bot.sess.Balls[i]);
-                    Console.WriteLine($"{Context.User.Username} has picked up the { Bot.sess.Balls[i].ID} star Dragon Ball in {Context.Channel.Name} of {Context.Guild.Name}.");
-                    Bot.sess.Balls[i].Holder = Context.User;
-                    Bot.sess.Balls[i].Held = true;
-                    await Bot.sess.Balls[i].Msg1.DeleteAsync();
-                    await Bot.sess.Balls[i].Msg2.DeleteAsync();
+                    if (Bot.sess.Balls[i].Location == Context.Channel && Bot.sess.Balls[i].Held == false)
+                    {
+                        await Context.Channel.SendMessageAsync($"{Context.User.Username} collects the {Bot.sess.Balls[i].ID} star Dragon Ball.");
+                        var dbUser = DBFuncs.FindDBUser(Context.User);
+                        dbUser.heldBalls.Add(Bot.sess.Balls[i]);
+                        Console.WriteLine($"{Context.User.Username} has picked up the { Bot.sess.Balls[i].ID} star Dragon Ball in {Context.Channel.Name} of {Context.Guild.Name}.");
+                        Bot.sess.Balls[i].Holder = Context.User;
+                        Bot.sess.Balls[i].Held = true;
+                        await Bot.sess.Balls[i].Msg1.DeleteAsync();
+                        await Bot.sess.Balls[i].Msg2.DeleteAsync();
+                    }
                 }
             }
         }
@@ -150,7 +110,7 @@ namespace ShenronBot
             string msg = $"{Context.User.Username}, you are currently holding ";
             for (int i = 0; i < 7; i++)
             {
-                if (Bot.sess.Balls[i].Held && Bot.sess.Balls[i].Holder == Context.User) msg += $"the **{i + 1} Star Ball**, ";
+                if (Bot.sess.Balls[i].Held && Bot.sess.Balls[i].Holder.Id == Context.User.Id) msg += $"the **{i + 1} Star Ball**, ";
             }
 
             if (msg == $"{Context.User.Username}, you are currently holding ") msg += "no Dragon Balls.";
@@ -161,43 +121,46 @@ namespace ShenronBot
         [Command("attack"), Summary("Attacks another player. Kill them and they'll drop their Dragon Balls.")]
         public async Task Attack(IUser user)
         {
-            DBUser attacker = FindDBUser(Context.User);
-            DBUser target = FindDBUser(user);
-            Random rdm = new Random();
-
-            int attackerRole = rdm.Next(10) + 1;
-            int targetRole = rdm.Next(10) + 1;
-
-            await Context.Channel.SendMessageAsync($"{Context.User.Mention} attacks with a power of {attackerRole}, against {user.Mention}'s defense with power of {targetRole}!");
-            if (attackerRole > targetRole)
+            if (DBFuncs.PlayerRegistered(user))
             {
-                target.Hurt(Context.Channel);
-                await Context.Channel.SendMessageAsync($"{user.Username} takes damage!");
-                string msg = "They Collapse to the ground";
-                if (target.BallCount() > 0) msg += " and drop all their Dragon Balls.";
-                else msg += ".";
-                if (target.IsDead) await Context.Channel.SendMessageAsync(msg);
-            }
-            else if (targetRole > attackerRole)
-            {
-                attacker.Hurt(Context.Channel);
-                await Context.Channel.SendMessageAsync($"{Context.User.Username} takes damage!");
-                string msg = "They Collapse to the ground";
-                if (attacker.BallCount() > 0) msg += " and drop all their Dragon Balls.";
-                else msg += ".";
-                if (attacker.IsDead) await Context.Channel.SendMessageAsync(msg);
-            }
-            else
-            {
-                await Context.Channel.SendMessageAsync("The two collide, but nothing happens.");
-            }
+                DBUser attacker = DBFuncs.FindDBUser(Context.User);
+                DBUser target = DBFuncs.FindDBUser(user);
+                Random rdm = new Random();
 
+                int attackerRole = rdm.Next(10) + 1 + Convert.ToInt32(DBFuncs.GetAttribute("POWER_LVL", Context.User));
+                int targetRole = rdm.Next(10) + 1 + Convert.ToInt32(DBFuncs.GetAttribute("POWER_LVL", user)); ;
+
+                await Context.Channel.SendMessageAsync($"{Context.User.Mention} attacks with a power of {attackerRole}, against {user.Mention}'s defense with power of {targetRole}!");
+                if (attackerRole > targetRole)
+                {
+                    target.Hurt(Context.Channel);
+                    await Context.Channel.SendMessageAsync($"{user.Username} takes damage!");
+                    string msg = "They Collapse to the ground";
+                    if (target.BallCount() > 0) msg += " and drop all their Dragon Balls.";
+                    else msg += ".";
+                    if (target.IsDead) await Context.Channel.SendMessageAsync(msg);
+                }
+                else if (targetRole > attackerRole)
+                {
+                    attacker.Hurt(Context.Channel);
+                    await Context.Channel.SendMessageAsync($"{Context.User.Username} takes damage!");
+                    string msg = "They Collapse to the ground";
+                    if (attacker.BallCount() > 0) msg += " and drop all their Dragon Balls.";
+                    else msg += ".";
+                    if (attacker.IsDead) await Context.Channel.SendMessageAsync(msg);
+                }
+                else
+                {
+                    await Context.Channel.SendMessageAsync("The two collide, but nothing happens.");
+                }
+            }
+            else await Context.Channel.SendMessageAsync("The specified player could not be found. They are probably not registered.");
         }
 
         [Command("give"), Summary("Gives the specified Dragon Ball to the specified user.")]
         public async Task Give(int ID, IUser user)
         {
-            var dbUser = FindDBUser(Context.User);
+            var dbUser = DBFuncs.FindDBUser(Context.User);
             bool hasBall = false;
             int index = -1;
             for (int i = 0; i < dbUser.BallCount(); i++) if (dbUser.heldBalls[i].ID == ID) { hasBall = true; index = i; break; }
@@ -205,7 +168,7 @@ namespace ShenronBot
             {
                 DragonBall transferBall = dbUser.heldBalls[index];
                 dbUser.heldBalls.RemoveAt(index);
-                FindDBUser(user).heldBalls.Add(transferBall);
+                DBFuncs.FindDBUser(user).heldBalls.Add(transferBall);
                 transferBall.Holder = user;
                 await Context.Channel.SendMessageAsync($"{Context.User.Mention} has given {user.Mention} the {transferBall.ID} Star Ball");
             }
@@ -218,22 +181,13 @@ namespace ShenronBot
         [Command("initialize"), Alias("init")]
         public async Task Initialize()
         {
-            IRole human = Context.Guild.GetRole(Constants.Roles.HUMAN[0]);
-            IRole saiyan = Context.Guild.GetRole(Constants.Roles.SAIYAN[0]);
-            IRole namekian = Context.Guild.GetRole(Constants.Roles.NAMEKIAN[0]);
-
-            IGuild namek = Bot.client.GetGuild(Constants.Guilds.DBZ_NAMEK);
-            IGuild vegeta = Bot.client.GetGuild(Constants.Guilds.DBZ_VEGETA);
-
-            await namek.CreateRoleAsync(saiyan.Name, saiyan.Permissions, saiyan.Color, saiyan.IsHoisted);
-            await vegeta.CreateRoleAsync(saiyan.Name, saiyan.Permissions, saiyan.Color, saiyan.IsHoisted);
-
-            await namek.CreateRoleAsync(human.Name, human.Permissions, human.Color, human.IsHoisted);
-            await vegeta.CreateRoleAsync(human.Name, human.Permissions, human.Color, human.IsHoisted);
-            
-            await namek.CreateRoleAsync(namekian.Name, namekian.Permissions, namekian.Color, namekian.IsHoisted);
-            await vegeta.CreateRoleAsync(namekian.Name, namekian.Permissions, namekian.Color, namekian.IsHoisted);
-
+            foreach (ulong guild in Constants.Guilds.PLANETS)
+            {
+                var Guild = Bot.client.GetGuild(guild);
+                await Guild.CreateRoleAsync("Super Saiyan", color: Constants.Colours.SS_YELLOW);
+                await Guild.CreateRoleAsync("SSGSS", color: Constants.Colours.SSGSS_BLUE);
+                await Guild.CreateRoleAsync("Kaioken", color: Constants.Colours.KAIOKEN);
+            }
             await Context.Channel.SendMessageAsync("Done");
         }
 
@@ -253,22 +207,114 @@ namespace ShenronBot
             Thread.Sleep(2000);
             await msg.DeleteAsync();
         }
-        
 
-        DBUser FindDBUser(IUser user)
+        [Command("eval")]
+        public async Task EvaluateCmd([Remainder] string expression)
         {
-            int count = 0;
-            while (true)
+            if (Context.User.Id == Constants.Users.BRADY)
             {
-                count++;
-                for (int i = 0; i < Bot.sess.Players.Count(); i++) if (Bot.sess.Players[i].User.Id == user.Id) return Bot.sess.Players[i];
-                Bot.sess.Players.Add(new DBUser(Context.User));
-                if (count == 5 || count == 20 || count == 100) Console.WriteLine("Something is wrong with FindDBuser()!");
+                IUserMessage msg = await ReplyAsync("Evaluating...");
+                string result = await EvalService.EvaluateAsync(Context, expression);
+                var user = Context.User as IGuildUser;
+                if (user.RoleIds.ToArray().Count() > 1)
+                {
+                    var role = Context.Guild.GetRole(user.RoleIds.ElementAtOrDefault(1));
+                    var emb = new EmbedBuilder().WithColor(role.Color).WithDescription(result).WithTitle("Evaluated").WithCurrentTimestamp();
+                    await Context.Channel.SendMessageAsync("", embed: emb);
+                }
+                else
+                {
+                    var emb = new EmbedBuilder().WithColor(Constants.Colours.SHENRON_GREEN).WithDescription(result).WithTitle("Evaluated").WithCurrentTimestamp();
+                    await Context.Channel.SendMessageAsync("", embed: emb);
+                    
+                }
             }
 
         }
 
+        [Command("power"), Summary("Adjust your power and go to the next level! (Direction = up/down)")]
+        public async Task Power(string direction)
+        {
+            var guilds = Constants.Guilds.PLANETS;
+            if (direction == "up")
+            {
+                int lvl = Convert.ToInt32(DBFuncs.GetAttribute("LEVEL", Context.User));
+                ulong[] roles = new ulong[3];
+                if (lvl >= 100) roles = Constants.Roles.SSGSS;
+                else if (lvl >= 50) roles = Constants.Roles.SUPER;
+                else if (lvl >= 10) roles = Constants.Roles.KAIOKEN;
+                else { await Context.Channel.SendMessageAsync("You attempt to increase your power, but nothing happens."); return; }
 
+
+                for (int i = 0; i < 3; i++)
+                {
+                    var guildID = guilds.ElementAt(i);
+                    var guild = Bot.client.GetGuild(guildID);
+                    if (await Funcs.InGuild(guild, Context.User))
+                    {
+                        var user = guild.GetUser(Context.User.Id);
+                        await user.AddRoleAsync(guild.GetRole(roles[i]));
+                    }
+                }
+            }
+            else if (direction == "down")
+            {
+                for (int i = 0; i < 3; i++)
+                {
+                    var guildID = guilds.ElementAt(i);
+                    var guild = Bot.client.GetGuild(guildID);
+                    if (await Funcs.InGuild(guild, Context.User))
+                    {
+                        var user = guild.GetUser(Context.User.Id);
+                        if (user.Roles.Contains(guild.GetRole(Constants.Roles.KAIOKEN[i]))) await user.RemoveRoleAsync(guild.GetRole(Constants.Roles.KAIOKEN[i]));
+                        else if (user.Roles.Contains(guild.GetRole(Constants.Roles.SUPER[i]))) await user.RemoveRoleAsync(guild.GetRole(Constants.Roles.SUPER[i]));
+                        else if (user.Roles.Contains(guild.GetRole(Constants.Roles.SSGSS[i]))) await user.RemoveRoleAsync(guild.GetRole(Constants.Roles.SSGSS[i]));
+                    }
+                }
+            }
+        }
+        
+        [Command("profile"), Summary("View your or another users profile.")]
+        public async Task Profile(IUser user)
+        {
+            if (DBFuncs.PlayerRegistered(user))
+            {
+                var emb = new JEmbed();
+
+                emb.ThumbnailUrl = user.GetAvatarUrl();
+                emb.ColorStripe = Funcs.GetColour(user, Context.Guild);
+
+                emb.Fields.Add(new JEmbedField(x =>
+                {
+                    x.Header = "Race";
+                    x.Text = DBFuncs.GetAttribute("RACE", user);
+                }));
+
+                emb.Fields.Add(new JEmbedField(x =>
+                {
+                    x.Header = "Level";
+                    x.Text = DBFuncs.GetAttribute("LEVEL", user);
+                    x.Inline = true;
+                }));
+
+                emb.Fields.Add(new JEmbedField(x =>
+                {
+                    x.Header = "EXP";
+                    x.Text = DBFuncs.GetAttribute("EXP", user) + "/" + Convert.ToString(Math.Pow(Convert.ToInt32(DBFuncs.GetAttribute("LEVEL", user)), 2) + 10);
+                    x.Inline = true;
+                }));
+
+                emb.Author.Name = user.Username + "'s Profile";
+
+                var embed = emb.Build();
+                await Context.Channel.SendMessageAsync("", embed: embed);
+            }
+            else await Context.Channel.SendMessageAsync("Player in not registered");
+        }
+
+        [Command("profile"), Summary("View your or another users profile.")]
+        public async Task Profile() { await Profile(Context.User); }
+        
     }
 
 }

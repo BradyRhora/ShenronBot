@@ -1,2 +1,3 @@
-﻿RACE:
+﻿NAME:
+RACE:
 POWER_LVL:

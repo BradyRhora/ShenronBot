@@ -1,5 +1,5 @@
-Brady
-RACE: Saiyan
+Moonfang
+RACE: Human
 POWER_LVL: 10
 LEVEL: 1
 EXP: 0
