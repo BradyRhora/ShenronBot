@@ -1,5 +1,5 @@
 Brady
 RACE: Saiyan
 POWER_LVL: 10
-LEVEL: 1
+LEVEL: 5
 EXP: 0

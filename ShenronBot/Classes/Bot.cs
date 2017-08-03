@@ -40,7 +40,7 @@ namespace ShenronBot
                 // Connect the client to Discord's gateway
                 await client.StartAsync();
                 Console.WriteLine("Shenron successfully intialized");
-                //var expTimer = new Timer(ExpTimer, null, 0, 60 * 1000);
+                var expTimer = new Timer(ExpTimer, null, 0, 30 * 60 * 1000);
                 // Block this task until the program is exited.
                 await Task.Delay(-1);
             }
@@ -86,6 +86,8 @@ namespace ShenronBot
             {
                 if (DBFuncs.PlayerRegistered(message.Author) || message.Content.StartsWith("db!register"))
                 {
+
+
                     var context = new CommandContext(client, message);
                     var result = await commands.ExecuteAsync(context, argPos);
                     if (!result.IsSuccess)
@@ -112,7 +114,7 @@ namespace ShenronBot
         }
         
 
-        /*async void ExpTimer(Object state)
+        async void ExpTimer(Object state)
         {
             Console.WriteLine("TIMER");
             foreach (ulong guildID in Constants.Guilds.PLANETS)
@@ -129,7 +131,7 @@ namespace ShenronBot
                     }
                 }
             }
-        }*/
+        }
     }
 
     ///Late Night THOTS:

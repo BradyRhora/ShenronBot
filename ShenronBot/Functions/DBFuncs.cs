@@ -135,15 +135,26 @@ namespace ShenronBot
             int exp = Convert.ToInt32(GetAttribute("EXP", user));
             int lvl = Convert.ToInt32(GetAttribute("LEVEL", user));
 
-            if (exp > (Math.Pow(lvl,2) + 10))
+            var expRate = Math.Pow(lvl, 2) + 10;
+            if (exp >= (Math.Pow(lvl,2) + 10))
             {
-                while (exp > (Math.Pow(lvl, 2) + 10))
+                while (exp >= (Math.Pow(lvl, 2) + 10))
                 {
-                    SetAttribute("LEVEL", user, Convert.ToString(lvl++));
+                    SetAttribute("LEVEL", user, Convert.ToString(++lvl));
+                    SetAttribute("EXP", user, "0");
                 }
                 Console.WriteLine($"{user.Username} has leveled up to level {lvl}");
                 user.SendMessageAsync($"You have leveled up to level {lvl}.");
             }
         }
+
+        public static async void AddEXP(IUser user, int amount)
+        {
+            int currentEXP = Convert.ToInt32(GetAttribute("EXP", user));
+            int newEXP = currentEXP + amount;
+            SetAttribute("EXP", user, Convert.ToString(newEXP));
+            CheckEXP(user);
+        }
+
     }
 }

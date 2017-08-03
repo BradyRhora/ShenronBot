@@ -19,8 +19,8 @@ namespace ShenronBot
             emb.Author.Name = "Shenron Commands";
             emb.ThumbnailUrl = Context.User.AvatarId;
             emb.ColorStripe = Constants.Colours.SHENRON_GREEN;
-            
-            foreach(CommandInfo command in Bot.commands.Commands)
+
+            foreach (CommandInfo command in Bot.commands.Commands)
             {
                 emb.Fields.Add(new JEmbedField(x =>
                 {
@@ -63,12 +63,53 @@ namespace ShenronBot
                 File.WriteAllLines($@"Players\{Context.User.Id}.txt", toWrite);
 
                 DBFuncs.LoadRoles(Context.User);
-                
+
 
                 await Context.Channel.SendMessageAsync($"{Context.User.Mention} has successfully registered as a {wRace}. Go forth to Planet {planet}.");
             }
             else await Context.Channel.SendMessageAsync("Please choose either Human, Saiyan, or Namekian as your race. `db!register [race]`");
         }
+
+        [Command("profile"), Summary("View your or another users profile.")]
+        public async Task Profile(IUser user)
+        {
+            if (DBFuncs.PlayerRegistered(user))
+            {
+                var emb = new JEmbed();
+
+                emb.ThumbnailUrl = user.GetAvatarUrl();
+                emb.ColorStripe = Funcs.GetColour(user, Context.Guild);
+
+                emb.Fields.Add(new JEmbedField(x =>
+                {
+                    x.Header = "Race";
+                    x.Text = DBFuncs.GetAttribute("RACE", user);
+                }));
+
+                emb.Fields.Add(new JEmbedField(x =>
+                {
+                    x.Header = "Level";
+                    x.Text = DBFuncs.GetAttribute("LEVEL", user);
+                    x.Inline = true;
+                }));
+
+                emb.Fields.Add(new JEmbedField(x =>
+                {
+                    x.Header = "EXP";
+                    x.Text = DBFuncs.GetAttribute("EXP", user) + "/" + Convert.ToString(Math.Pow(Convert.ToInt32(DBFuncs.GetAttribute("LEVEL", user)), 2) + 10);
+                    x.Inline = true;
+                }));
+
+                emb.Author.Name = user.Username + "'s Profile";
+
+                var embed = emb.Build();
+                await Context.Channel.SendMessageAsync("", embed: embed);
+            }
+            else await Context.Channel.SendMessageAsync("Player in not registered");
+        }
+
+        [Command("profile")]
+        public async Task Profile() { await Profile(Context.User); }
 
         [Command("start"), Summary("Starts a new Dragon Ball Session. Can only be done by GM.")]
         public async Task Start()
@@ -104,7 +145,7 @@ namespace ShenronBot
             }
         }
 
-        [Command("held"),Summary("Displays the Dragon Balls that you are currently holding.")]
+        [Command("held"), Summary("Displays the Dragon Balls that you are currently holding.")]
         public async Task Held()
         {
             string msg = $"{Context.User.Username}, you are currently holding ";
@@ -177,6 +218,26 @@ namespace ShenronBot
                 await Context.Channel.SendMessageAsync("You do not have that ball.");
             }
         }
+
+        [Command("wish"), Summary("Use the power of the Dragon Balls to make a wish to the Eternal Dragon!")]
+        public async Task Wish(string wish)
+        {
+            if (wish == "list")
+            {
+                JEmbed jemb = new JEmbed();
+                jemb.Author.Name = "Wish List";
+                jemb.Author.IconUrl = Bot.client.CurrentUser.GetAvatarUrl();
+                jemb.ColorStripe = Constants.Colours.SHENRON_GREEN;
+
+                jemb.Fields.Add(new JEmbedField(x =>
+                {
+                    x.Header = "";
+                }));
+            }
+        }
+
+        [Command("wish")]
+        public async Task Wish() { await Wish("list"); }
 
         [Command("initialize"), Alias("init")]
         public async Task Initialize()
@@ -274,47 +335,12 @@ namespace ShenronBot
             }
         }
         
-        [Command("profile"), Summary("View your or another users profile.")]
-        public async Task Profile(IUser user)
+        [Command("giveexp")]
+        public async Task GiveEXP(int amount, IUser user)
         {
-            if (DBFuncs.PlayerRegistered(user))
-            {
-                var emb = new JEmbed();
-
-                emb.ThumbnailUrl = user.GetAvatarUrl();
-                emb.ColorStripe = Funcs.GetColour(user, Context.Guild);
-
-                emb.Fields.Add(new JEmbedField(x =>
-                {
-                    x.Header = "Race";
-                    x.Text = DBFuncs.GetAttribute("RACE", user);
-                }));
-
-                emb.Fields.Add(new JEmbedField(x =>
-                {
-                    x.Header = "Level";
-                    x.Text = DBFuncs.GetAttribute("LEVEL", user);
-                    x.Inline = true;
-                }));
-
-                emb.Fields.Add(new JEmbedField(x =>
-                {
-                    x.Header = "EXP";
-                    x.Text = DBFuncs.GetAttribute("EXP", user) + "/" + Convert.ToString(Math.Pow(Convert.ToInt32(DBFuncs.GetAttribute("LEVEL", user)), 2) + 10);
-                    x.Inline = true;
-                }));
-
-                emb.Author.Name = user.Username + "'s Profile";
-
-                var embed = emb.Build();
-                await Context.Channel.SendMessageAsync("", embed: embed);
-            }
-            else await Context.Channel.SendMessageAsync("Player in not registered");
+            DBFuncs.AddEXP(user, amount);
+            await Context.Channel.SendMessageAsync($"{user.Mention} has been given {amount} EXP.");
         }
-
-        [Command("profile"), Summary("View your or another users profile.")]
-        public async Task Profile() { await Profile(Context.User); }
-        
     }
 
 }
