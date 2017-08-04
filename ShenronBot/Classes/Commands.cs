@@ -38,6 +38,37 @@ namespace ShenronBot
 
         }
 
+        [Command("adminhelp"), Summary("Displays admin commands and descriptions. [Admin Only]")]
+        public async Task AdminHelp()
+        {
+            if (Funcs.IsAdmin(Context.User))
+            {
+                JEmbed emb = new JEmbed();
+                emb.Author.Name = "Shenron Admin Commands";
+                emb.ThumbnailUrl = Context.User.AvatarId;
+                emb.ColorStripe = Constants.Colours.SHENRON_GREEN;
+
+                foreach (CommandInfo command in Bot.commands.Commands)
+                {
+                    if (command.Summary == null)
+                    {
+                        emb.Fields.Add(new JEmbedField(x =>
+                        {
+                            string header = "db!" + command.Name;
+                            foreach (ParameterInfo parameter in command.Parameters)
+                            {
+                                header += " [" + parameter.Name + "]";
+                            }
+                            x.Header = header;
+                            x.Text = "";
+                        }));
+                    }
+                }
+
+                await Context.Channel.SendMessageAsync("", embed: emb.Build());
+            }
+        }
+
         [Command("register"), Summary("Use this to register!")]
         public async Task Register(string race)
         {

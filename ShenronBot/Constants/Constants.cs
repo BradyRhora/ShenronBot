@@ -42,7 +42,7 @@ namespace ShenronBot
             public static ulong ON_NAMEK = 342175783688732672;
             public static ulong ON_VEGETA = 342177434830897153;
 
-            public static ulong ADMIN = 000000000000000000;
+            public static ulong ADMIN = 343080334641987595;
         }
 
         public class Colours
@@ -58,6 +58,8 @@ namespace ShenronBot
 
         public class Channels
         {
+            public static ulong ADMIN = 343080246188179456;
+
             public static ulong VEGETA_INFO = 342068857147621386;
             public static ulong VEGETA_GEN = 342343936469106689;
 

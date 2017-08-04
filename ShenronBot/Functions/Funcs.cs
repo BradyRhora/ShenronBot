@@ -24,7 +24,8 @@ namespace ShenronBot
 
         public static bool IsAdmin(IUser user)
         {
-            var gUser = user as IGuildUser;
+            var gUser = Bot.client.GetGuild(Constants.Guilds.DBZ_EARTH).GetUser(user.Id) as IGuildUser;
+            
             if (user.Id == Constants.Users.BRADY || gUser.RoleIds.Contains(Constants.Roles.ADMIN)) return true;
             else return false;
         }
