@@ -294,29 +294,20 @@ namespace ShenronBot
         }
 
         [Command("power"), Summary("Adjust your power and go to the next level! (Direction = up/down)")]
-        public async Task Power(string direction)
+        public async Task Power(string direction) { await Power(direction, 1); }
+
+        [Command("power")]
+        public async Task Power(string direction, int amount)
         {
             var guilds = Constants.Guilds.PLANETS;
             if (direction == "up")
             {
                 int lvl = Convert.ToInt32(DBFuncs.GetAttribute("LEVEL", Context.User));
                 ulong[] roles = new ulong[3];
-                if (lvl >= 100) roles = Constants.Roles.SSGSS;
-                else if (lvl >= 50) roles = Constants.Roles.SUPER;
-                else if (lvl >= 10) roles = Constants.Roles.KAIOKEN;
-                else { await Context.Channel.SendMessageAsync("You attempt to increase your power, but nothing happens."); return; }
 
 
-                for (int i = 0; i < 3; i++)
-                {
-                    var guildID = guilds.ElementAt(i);
-                    var guild = Bot.client.GetGuild(guildID);
-                    if (await Funcs.InGuild(guild, Context.User))
-                    {
-                        var user = guild.GetUser(Context.User.Id);
-                        await user.AddRoleAsync(guild.GetRole(roles[i]));
-                    }
-                }
+
+                
             }
             else if (direction == "down")
             {

@@ -38,5 +38,21 @@ namespace ShenronBot
 
             return false;
         }
+
+        public static async void GiveRole(IRole[] roles, IUser user)
+        {
+            var guilds = Constants.Guilds.PLANETS;
+
+            for (int i = 0; i < 3; i++)
+            {
+                var guildID = guilds.ElementAt(i);
+                var guild = Bot.client.GetGuild(guildID);
+                if (await Funcs.InGuild(guild, user))
+                {
+                    var gUser = guild.GetUser(user.Id);
+                    await gUser.AddRoleAsync(roles[i]);
+                }
+            }
+        }
     }
 }
