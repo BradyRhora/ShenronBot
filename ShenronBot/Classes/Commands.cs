@@ -53,12 +53,16 @@ namespace ShenronBot
                 else if (race == "namekian") { wRace = Player.Race.Namekian; planet = "Namek: https://discord.gg/tJVfgms"; }
 
 
-                string[] toWrite = new string[5];
+                string[] toWrite = new string[9];
                 toWrite[0] = Context.User.Username;
                 toWrite[1] = $"RACE: {wRace}";
                 toWrite[2] = "POWER_LVL: 10";
-                toWrite[3] = "LEVEL: 1";
-                toWrite[4] = "EXP: 0";
+                toWrite[3] = "MULTIPLIER: 1";
+                toWrite[4] = "ENERGY: 100";
+                toWrite[5] = "LEVEL: 1";
+                toWrite[6] = "EXP: 0";
+                toWrite[7] = "LOCATION: null";
+                toWrite[8] = "SKILLS:";
 
                 File.WriteAllLines($@"Players\{Context.User.Id}.txt", toWrite);
 
@@ -70,16 +74,19 @@ namespace ShenronBot
             else await Context.Channel.SendMessageAsync("Please choose either Human, Saiyan, or Namekian as your race. `db!register [race]`");
         }
 
+        [Command("register")]
+        public async Task Register() { await Context.Channel.SendMessageAsync("Please specify a race. (Human, Saiyan, or Namekian)"); }
+
         [Command("profile"), Summary("View your or another users profile.")]
         public async Task Profile(IUser user)
         {
             if (DBFuncs.PlayerRegistered(user))
             {
-                var emb = new JEmbed();
-
-                emb.ThumbnailUrl = user.GetAvatarUrl();
-                emb.ColorStripe = Funcs.GetColour(user, Context.Guild);
-
+                var emb = new JEmbed()
+                {
+                    ThumbnailUrl = user.GetAvatarUrl(),
+                    ColorStripe = Funcs.GetColour(user, Context.Guild)
+                };
                 emb.Fields.Add(new JEmbedField(x =>
                 {
                     x.Header = "Race";
@@ -159,6 +166,20 @@ namespace ShenronBot
             await Context.Channel.SendMessageAsync(msg);
         }
 
+        [Command("scouter"), Summary("WHAT DOES THE SCOUTER SAY ABOUT HIS POWER LEVEL?")]
+        public async Task Scouter(IUser user)
+        {
+            var JEmb = new JEmbed();
+            JEmb.Author.Name = $"{user.Username}'s Power Level";
+            JEmb.ColorStripe = Funcs.GetColour(user, Context.Guild);
+            JEmb.Description = Convert.ToString(DBFuncs.GetPowerLVL(user));
+
+            await Context.Channel.SendMessageAsync("", embed: JEmb.Build());
+        }
+
+        [Command("scouter")]
+        public async Task Scouter() { await Scouter(Context.User); }
+
         [Command("attack"), Summary("Attacks another player. Kill them and they'll drop their Dragon Balls.")]
         public async Task Attack(IUser user)
         {
@@ -168,8 +189,8 @@ namespace ShenronBot
                 DBUser target = DBFuncs.FindDBUser(user);
                 Random rdm = new Random();
 
-                int attackerRole = rdm.Next(10) + 1 + Convert.ToInt32(DBFuncs.GetAttribute("POWER_LVL", Context.User));
-                int targetRole = rdm.Next(10) + 1 + Convert.ToInt32(DBFuncs.GetAttribute("POWER_LVL", user)); ;
+                int attackerRole = rdm.Next(10) + 1 + DBFuncs.GetPowerLVL(Context.User);
+                int targetRole = rdm.Next(10) + 1 + DBFuncs.GetPowerLVL(user);
 
                 await Context.Channel.SendMessageAsync($"{Context.User.Mention} attacks with a power of {attackerRole}, against {user.Mention}'s defense with power of {targetRole}!");
                 if (attackerRole > targetRole)
@@ -219,22 +240,61 @@ namespace ShenronBot
             }
         }
 
-        [Command("wish"), Summary("Use the power of the Dragon Balls to make a wish to the Eternal Dragon!")]
-        public async Task Wish(string wish)
+        [Command("wish"), Summary("Use the power of the Dragon Balls to make a wish to the Eternal Dragon! Input no name to give yourself the wish.")]
+        public async Task Wish(string wish, IUser user)
         {
-            if (wish == "list")
+            if (DBFuncs.FindDBUser(user).BallCount() == 7)
             {
-                JEmbed jemb = new JEmbed();
-                jemb.Author.Name = "Wish List";
-                jemb.Author.IconUrl = Bot.client.CurrentUser.GetAvatarUrl();
-                jemb.ColorStripe = Constants.Colours.SHENRON_GREEN;
-
-                jemb.Fields.Add(new JEmbedField(x =>
+                if (wish == "list")
                 {
-                    x.Header = "";
-                }));
+                    JEmbed jemb = new JEmbed();
+                    jemb.Author.Name = "Wish List";
+                    jemb.Author.IconUrl = Bot.client.CurrentUser.GetAvatarUrl();
+                    jemb.ColorStripe = Constants.Colours.SHENRON_GREEN;
+
+                    int counter = 1;
+                    foreach (string item in File.ReadAllLines(@"Files\wishes.txt"))
+                    {
+                        jemb.Fields.Add(new JEmbedField(x =>
+                        {
+                            x.Header = $"[{counter}]";
+                            x.Text = item;
+                        }));
+                        counter++;
+                    }
+
+                    await Context.Channel.SendMessageAsync("", embed: jemb.Build());
+                }
+                else if (wish == "1")
+                {
+                    int currentLVL = Convert.ToInt32(DBFuncs.GetAttribute("LEVEL", user));
+                    int newLVL = currentLVL + 10;
+                    DBFuncs.SetAttribute("LEVEL", user, Convert.ToString(newLVL));
+
+                    await Context.Channel.SendMessageAsync($"Your wish has been granted... {user.Username}! You are now level {newLVL}.");
+                }
+                else if (wish == "2") { }//increase currency
+                else if (wish == "3") { }//give skill
+                else if (wish == "4") { }//custom
+                else { await Context.Channel.SendMessageAsync($"Wish '{wish}' does not exist. Refer to the wish by it's ID number."); return; }
+
+                for (int i = 0; i < 7; i++)
+                {
+                    if (Bot.sess.Balls[i].Location == null && Bot.sess.Balls[i].Held == false)
+                    {
+                        var dbUser = DBFuncs.FindDBUser(Context.User);
+                        dbUser.heldBalls.Clear();
+                        Bot.sess.Balls[i].Holder = null;
+                        Bot.sess.Balls[i].Held = false;
+                        Bot.sess.End();
+                    }
+                }
             }
+            else await Context.Channel.SendMessageAsync("Shenron cannot be summoned without all seven **Dragon Balls**!");
         }
+
+        [Command("wish")]
+        public async Task Wish(string wish) { await Wish(wish, Context.User); }
 
         [Command("wish")]
         public async Task Wish() { await Wish("list"); }
@@ -259,10 +319,12 @@ namespace ShenronBot
             var messages = await Context.Channel.GetMessagesAsync(amount + 1).Flatten();
             await Context.Channel.DeleteMessagesAsync(messages);
 
-            JEmbed embed = new JEmbed();
-            embed.Title = "Messages deleted.";
-            embed.Description = $"{amount} messages deleted.";
-            embed.ColorStripe = Constants.Colours.SHENRON_GREEN;
+            JEmbed embed = new JEmbed()
+            {
+                Title = "Messages deleted.",
+                Description = $"{amount} messages deleted.",
+                ColorStripe = Constants.Colours.SHENRON_GREEN
+            };
             var emb = embed.Build();
             var msg = await Context.Channel.SendMessageAsync("", embed: emb);
             Thread.Sleep(2000);
@@ -300,12 +362,16 @@ namespace ShenronBot
             if (direction == "up")
             {
                 int lvl = Convert.ToInt32(DBFuncs.GetAttribute("LEVEL", Context.User));
+                string multiplier = "1";
+                string race = DBFuncs.GetAttribute("RACE", Context.User);
+
                 ulong[] roles = new ulong[3];
-                if (lvl >= 100) roles = Constants.Roles.SSGSS;
-                else if (lvl >= 50) roles = Constants.Roles.SUPER;
-                else if (lvl >= 10) roles = Constants.Roles.KAIOKEN;
+                if (lvl >= 100 && race == "Saiyan") { roles = Constants.Roles.SSGSS; multiplier = "1000"; }
+                else if (lvl >= 50 && race == "Saiyan") { roles = Constants.Roles.SUPER; multiplier = "100"; }
+                else if (lvl >= 10) { roles = Constants.Roles.KAIOKEN; multiplier = "10"; }
                 else { await Context.Channel.SendMessageAsync("You attempt to increase your power, but nothing happens."); return; }
 
+                DBFuncs.SetAttribute("MULTIPLIER", Context.User, multiplier);
 
                 for (int i = 0; i < 3; i++)
                 {
@@ -332,6 +398,7 @@ namespace ShenronBot
                         else if (user.Roles.Contains(guild.GetRole(Constants.Roles.SSGSS[i]))) await user.RemoveRoleAsync(guild.GetRole(Constants.Roles.SSGSS[i]));
                     }
                 }
+                DBFuncs.SetAttribute("MULTIPLIER", Context.User, "1");
             }
         }
         
@@ -340,6 +407,145 @@ namespace ShenronBot
         {
             DBFuncs.AddEXP(user, amount);
             await Context.Channel.SendMessageAsync($"{user.Mention} has been given {amount} EXP.");
+        }
+
+        [Command("moveplanet"), Summary("Currently used to switch planets, will not remain this way.")]
+        public async Task MovePlanet(string planet)
+        {
+            string msg = await DBFuncs.MoveToPlanet(Context.User, planet);
+            await Context.Channel.SendMessageAsync(msg);
+        }
+
+        [Command("train")]
+        public async Task Train(string npcChoice)
+        {
+            bool npcfound = false;
+            foreach (DBNPC npc in NPCList.NPCs)
+            {
+                if (Context.Channel.Id == npc.Location)
+                {
+                    if (npc.Name.ToLower().Contains(npcChoice.ToLower()))
+                    {
+                        npcfound = true;
+                        JEmbed JEmb = new JEmbed();
+                        JEmb.ThumbnailUrl = $@"DragonBall\Images\{npc.Name}.jpg";
+                        JEmb.Author.Name = npc.Name;
+                        JEmb.Description = npc.Dialogue;
+
+                        JEmb.Fields.Add(new JEmbedField(x =>
+                        {
+                            x.Header = "Race:";
+                            x.Text = $"{npc.Race}";
+                            x.Inline = true;
+                        }));
+
+                        JEmb.Fields.Add(new JEmbedField(x =>
+                        {
+                            x.Header = "Power Level:";
+                            x.Text = $"~{npc.Power_Level}";
+                            x.Inline = true;
+                        }));
+
+                        string name = npc.Name;
+                        if (npc.Name.Contains(" ")) name = $"\"{npc.Name}\"";
+
+                        JEmb.Fields.Add(new JEmbedField(x =>
+                        {
+                            x.Header = $"db!train {name} 1";
+                            x.Text = "Train me!";
+                        }));
+
+                        JEmb.Fields.Add(new JEmbedField(x =>
+                        {
+                            x.Header = $"db!train {name} 2";
+                            x.Text = "Nevermind.";
+                        }));
+
+                        JEmb.ColorStripe = Funcs.GetColour(Context.User, Context.Guild);
+                        
+                        await Context.Channel.SendMessageAsync("", embed: JEmb.Build());
+                        break;
+                    }
+                }
+            }
+            if (!npcfound) await Context.Channel.SendMessageAsync($"Cannot find NPC with name {npcChoice}.");
+
+        }
+
+        [Command("train")]
+        public async Task Train(string npcChoice, int choice)
+        {
+            foreach (DBNPC npc in NPCList.NPCs)
+            {
+                if (Context.Channel.Id == npc.Location)
+                {
+                    if (npc.Name.ToLower().Contains(npcChoice.ToLower()))
+                    {
+
+                    }
+                }
+            }
+        }
+
+        [Command("train"), Summary("Increase your strength and learn new techniques.")]
+        public async Task Train()
+        {
+            List<DBNPC> inLocation = new List<DBNPC>();
+            List<DBUser> here = new List<DBUser>();
+
+            foreach (DBNPC npc in NPCList.NPCs)
+            {
+                if (Context.Channel.Id == npc.Location)
+                {
+                    inLocation.Add(npc);
+                }
+            }
+
+            foreach (DBUser user in Bot.sess.Players)
+            {
+                if (Context.Channel.Id == Convert.ToUInt64(DBFuncs.GetAttribute("LOCATION",user.User)) && user.User.Id != Context.User.Id)
+                {
+                    here.Add(user);
+                }
+            }
+
+            var JEmb = new JEmbed();
+
+            JEmb.Description = "People in area:";
+
+            if (inLocation.Count > 0 || here.Count > 0)
+            {
+                foreach (DBNPC npc in inLocation)
+                {
+                    JEmb.Fields.Add(new JEmbedField(x =>
+                    {
+                        x.Header = npc.Name + " [NPC]";
+                        x.Text = $"Power Level: ~{npc.Power_Level}";
+                    }));
+                }
+
+                foreach (DBUser user in here)
+                {
+                    JEmb.Fields.Add(new JEmbedField(x =>
+                    {
+                        x.Header = user.User.Username + " [PLAYER]";
+                        x.Text = $"Power Level: ~{DBFuncs.GetPowerLVL(user.User)}";
+                    }));
+                }
+
+                JEmb.ColorStripe = Funcs.GetColour(Context.User, Context.Guild);
+                JEmb.Footer.Text = "Type 'db!train [name]' to request to train with them!";
+            }
+            else
+            {
+                JEmb.Fields.Add(new JEmbedField(x =>
+                {
+                    x.Header = "None";
+                    x.Text = "There seems to be no one here.. Check another area.";
+                }));
+            }
+
+            await Context.Channel.SendMessageAsync("", embed: JEmb.Build());
         }
     }
 

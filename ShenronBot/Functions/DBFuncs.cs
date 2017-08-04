@@ -4,6 +4,7 @@ using System.Text;
 using System.IO;
 using Discord;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace ShenronBot
 {
@@ -36,6 +37,13 @@ namespace ShenronBot
                     break;
                 }
             }
+        }
+
+        public static int GetPowerLVL(IUser user)
+        {
+            
+
+            return Convert.ToInt32(GetAttribute("POWER_LVL", user)) * (Convert.ToInt32(GetAttribute("MULTIPLIER", user)));
         }
 
         public static bool PlayerRegistered(IUser user)
@@ -136,24 +144,71 @@ namespace ShenronBot
             int lvl = Convert.ToInt32(GetAttribute("LEVEL", user));
 
             var expRate = Math.Pow(lvl, 2) + 10;
-            if (exp >= (Math.Pow(lvl,2) + 10))
+            if (exp >= (Math.Pow(lvl,2) + 10)) //level up
             {
-                while (exp >= (Math.Pow(lvl, 2) + 10))
+                while (exp >= (Math.Pow(lvl, 2) + 10)) //level up
                 {
                     SetAttribute("LEVEL", user, Convert.ToString(++lvl));
-                    SetAttribute("EXP", user, "0");
+                    exp = Convert.ToInt32(exp - (Math.Pow(lvl - 1, 2) + 10));
+                    SetAttribute("EXP", user,  Convert.ToString(exp));
+                    SetAttribute("POWER_LVL", user, Convert.ToString(lvl*10));
                 }
                 Console.WriteLine($"{user.Username} has leveled up to level {lvl}");
                 user.SendMessageAsync($"You have leveled up to level {lvl}.");
             }
         }
 
-        public static async void AddEXP(IUser user, int amount)
+        public static void AddEXP(IUser user, int amount)
         {
             int currentEXP = Convert.ToInt32(GetAttribute("EXP", user));
             int newEXP = currentEXP + amount;
             SetAttribute("EXP", user, Convert.ToString(newEXP));
             CheckEXP(user);
+        }
+
+        public static async Task<string> MoveToPlanet(IUser user, string planet)
+        {
+            if (PlayerRegistered(user))
+            {
+                ulong[] planetRoles = { Constants.Roles.ON_EARTH, Constants.Roles.ON_NAMEK, Constants.Roles.ON_VEGETA };
+
+                for (int i = 0; i < 3; i++)
+                {
+                    var guild = Bot.client.GetGuild(Constants.Guilds.PLANETS[i]);
+                    var gUser = guild.GetUser(user.Id);
+
+                    await gUser.RemoveRoleAsync(guild.GetRole(planetRoles[i]));
+                }
+
+                planet = planet.ToLower();
+                
+                
+                for (int i = 0; i < 3; i++)
+                { 
+                    var guild = Bot.client.GetGuild(Constants.Guilds.PLANETS[i]);
+                    var gUser = guild.GetUser(user.Id);
+                    if (guild.Name.ToLower().Contains(planet))
+                    {
+                        await gUser.AddRoleAsync(guild.GetRole(planetRoles[i]));
+                        return $"Moved to planet {guild.Name.Replace("DBZ ","")}";
+                    }
+
+                }
+
+                return "Planet not found.";
+            }
+            return "Player not registered.";
+        }
+
+        public static Embed Dialogue(DBNPC npc, string dialogue)
+        {
+            JEmbed JEmb = new JEmbed();
+            JEmb.ThumbnailUrl = $@"DragonBall\Images\{npc.Name}.jpg";
+            JEmb.Author.Name = npc.Name;
+            JEmb.Description = dialogue;
+            JEmb.ColorStripe = Constants.Colours.SHENRON_GREEN;
+
+            return JEmb.Build();
         }
 
     }

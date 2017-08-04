@@ -15,6 +15,10 @@ namespace ShenronBot
             public static ulong DBZ_VEGETA = 341819801603276801;
 
             public static ulong[] PLANETS = { 341819643033550848, 341819718694600708 , 341819801603276801 };
+
+            public static string EARTH_LINK = "https://discord.gg/UwDKgAF";
+            public static string NAMEK_LINK = "https://discord.gg/tJVfgms";
+            public static string VEGETA_LINK = "https://discord.gg/vFaS8u2";
         }
 
         public class Users
@@ -59,11 +63,33 @@ namespace ShenronBot
 
             public static ulong EARTH_INFO = 342181627595587585;
             public static ulong EARTH_GEN = 342181267778830339;
+            public static ulong COMMANDS = 342177164852199425;
 
             public static ulong NAMEK_INFO = 342068642470428673;
             public static ulong NAMEK_GEN = 342344230011666434;
 
-            public static ulong[] BLOCKED_CHANNELS = { VEGETA_INFO, EARTH_INFO, NAMEK_INFO, VEGETA_GEN, EARTH_GEN, NAMEK_GEN };
+            public static ulong[] BLOCKED_CHANNELS = { VEGETA_INFO, EARTH_INFO, NAMEK_INFO, VEGETA_GEN, EARTH_GEN, NAMEK_GEN, COMMANDS};
+            
+            public static ulong KAME_HOUSE = 342163249703288844;
+            public static ulong CAPSULE_CORP = 342163338169548801;
+            public static ulong WEST_CITY = 341819643033550848;
+            public static ulong GOKUS_HOUSE = 343063372171837441;
+            public static ulong WASTELAND = 343063411145441280;
+
+            public static ulong GRAND_ELDERS_HOUSE = 342163696090611713;
+            public static ulong MOORIS_VILLAGE = 342191959517036554;
+            public static ulong NAMEK_FIELD = 341819718694600708;
+            public static ulong FRIEZAS_SHIP = 342164634041712642;
+        }
+
+        public class Images
+        {
+            public static string Roshi = @"DragonBall\Images\Roshi.jpg";
+            public static string Goku = @"DragonBall\Images\Goku.jpg";
+            public static string Vegeta = @"DragonBall\Images\Vegeta.jpg";
+            public static string Krillin = @"DragonBall\Images\Krillin.jpg";
+            public static string Piccolo = @"DragonBall\Images\Piccolo.jpg";
+            public static string Namekian = @"DragonBall\Images\Namekian.jpg";
         }
     }
 }

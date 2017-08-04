@@ -47,5 +47,10 @@ namespace ShenronBot
             }
         }
 
+        public void End()
+        {
+            Players.Clear();
+            Balls = null;
+        }
     }
 }

@@ -40,7 +40,6 @@ namespace ShenronBot
                 // Connect the client to Discord's gateway
                 await client.StartAsync();
                 Console.WriteLine("Shenron successfully intialized");
-                var expTimer = new Timer(ExpTimer, null, 0, 30 * 60 * 1000);
                 // Block this task until the program is exited.
                 await Task.Delay(-1);
             }
@@ -81,13 +80,18 @@ namespace ShenronBot
             if (message == null) return;
             int argPos = 0;
             
+            if (!Constants.Channels.BLOCKED_CHANNELS.Contains(message.Channel.Id))
+            {
+                DBUser user = DBFuncs.FindDBUser(message.Author);
+                user.Location = message.Channel.Id;
+                DBFuncs.SetAttribute("LOCATION", message.Author, Convert.ToString(message.Channel.Id));
+            }
+
             //changed prefix to db! because even though bot is called shenron, its more DB in general.
             if (message.HasStringPrefix("db!", ref argPos))
             {
-                if (DBFuncs.PlayerRegistered(message.Author) || message.Content.StartsWith("db!register"))
+                if (DBFuncs.PlayerRegistered(message.Author) || message.Content.StartsWith("db!register") || message.Content.StartsWith("db!help"))
                 {
-
-
                     var context = new CommandContext(client, message);
                     var result = await commands.ExecuteAsync(context, argPos);
                     if (!result.IsSuccess)
@@ -107,57 +111,16 @@ namespace ShenronBot
             else if (ID == Constants.Guilds.DBZ_NAMEK) chan = user.Guild.GetChannel(Constants.Channels.NAMEK_GEN);
             else if (ID == Constants.Guilds.DBZ_VEGETA) chan = user.Guild.GetChannel(Constants.Channels.VEGETA_GEN);
             var mChan = chan as IMessageChannel;
-            await mChan.SendMessageAsync($"{user.Mention} has entered {user.Guild.Name.Replace("DBZ ", "")}");
-
-            DBFuncs.LoadRoles(user);
-
-        }
-        
-
-        async void ExpTimer(Object state)
-        {
-            Console.WriteLine("TIMER");
-            foreach (ulong guildID in Constants.Guilds.PLANETS)
-            {
-                IGuild guild = null;
-
-                while (guild == null) guild = client.GetGuild(guildID) as IGuild;
-                foreach (IUser user in await guild.GetUsersAsync())
-                {
-                    if (DBFuncs.PlayerRegistered(user))
-                    {
-                        int newEXP = Convert.ToInt32(DBFuncs.GetAttribute("EXP", user) + 10);
-                        DBFuncs.SetAttribute("EXP", user, Convert.ToString(newEXP));
-                    }
-                }
-            }
+            string reg = "";
+            if (DBFuncs.PlayerRegistered(user)) DBFuncs.LoadRoles(user);
+            else reg = " Use `db!register [race]` to register as either a Human, Namekian, or Saiyan.";
+            await mChan.SendMessageAsync($"{user.Mention} has entered {user.Guild.Name.Replace("DBZ ", "")}.{reg}");
         }
     }
 
     ///Late Night THOTS:
     /*
-     * On death, ability to communicate and interact in DBZ Other World?
-     * Can no longer communicate in other DBZ servers?
-     * DBUser compatible with Player\ files?
      * Change server names from DBZ to DB.
-     * Powering up. EXP System? Levels? Just Power level?
-     * Saiyans:
-     *      Saiyan
-     *      Super Saiyan
-     *      Super Saiyan 2
-     *      Super Saiyan 3
-     *      Super Saiyan 4? (Research saiyan levels)
-     *      ???
-     *      Super Saiyan God
-     *      Super Saiyan God Super Saiyan (Ridiculous)
-     * Humans:
-     *      how tf do humans work..?
-     *      fuck
-     * Namekians:
-     *      why the fuck would anyone want to be one of these.
-     * All:
-     *      Learn skills and abilities?
-     *      Kaoken? (Learn 2 spell)
      * Basically fuckin Xenoverse TBH but more dragon ball focused.
      * Are items necessary? We'll see. def not first priority.
      * Obv current fighting system is NOT final.
