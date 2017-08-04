@@ -11,6 +11,8 @@ namespace ShenronBot
         public int Health { get; set; } = 3;
         public List<DragonBall> heldBalls;
         public bool IsDead { get; set; } = false;
+        public ulong Location { get; set; }
+
 
         public DBUser(IUser user)
         {
