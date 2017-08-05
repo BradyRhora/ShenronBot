@@ -127,15 +127,18 @@ namespace ShenronBot
 
         public static DBUser FindDBUser(IUser user)
         {
-            int count = 0;
-            while (true)
+            if (PlayerRegistered(user))
             {
-                count++;
-                for (int i = 0; i < Bot.sess.Players.Count(); i++) if (Bot.sess.Players[i].User.Id == user.Id) return Bot.sess.Players[i];
-                Bot.sess.Players.Add(new DBUser(user));
-                if (count == 5 || count == 20 || count == 100) Console.WriteLine("Something is wrong with FindDBuser()!");
+                int count = 0;
+                while (true)
+                {
+                    count++;
+                    for (int i = 0; i < Bot.sess.Players.Count(); i++) if (Bot.sess.Players[i].User.Id == user.Id) return Bot.sess.Players[i];
+                    Bot.sess.Players.Add(new DBUser(user));
+                    if (count == 5 || count == 20 || count == 100) Console.WriteLine("Something is wrong with FindDBuser()!");
+                }
             }
-
+            else return null;
         }
 
         public static void CheckEXP(IUser user)
@@ -211,5 +214,68 @@ namespace ShenronBot
             return JEmb.Build();
         }
 
+        public static List<string> GetPlayerSkillList(IUser user)
+        {
+            List<string> list = new List<string>();
+            string[] attributes = File.ReadAllLines($@"Players\{user.Id}.txt");
+            bool skillsStart = false;
+            foreach(string item in attributes)
+            {
+                if (!skillsStart) { if (item == "SKILLS:") skillsStart = true; }
+                else
+                {
+                    list.Add(item);
+                }
+                
+            }
+            return list;
+        }
+
+        public static bool HasSkill(DBSkill skill, IUser user)
+        {
+            foreach(string skillOption in GetPlayerSkillList(user))
+            {
+                if (skill.Name == GetSkill(skillOption).Name)
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        public static bool HasSkill(string skillName, IUser user)
+        {
+            DBSkill skill = GetSkill(skillName);
+            return HasSkill(skill, user);
+        }
+
+        public static DBSkill GetSkill(string skillName)
+        {
+            for (int i = 0; i < DBSkills.Skills.Count(); i++)
+            {
+                if (DBSkills.Skills[i].Name.ToLower() == skillName.ToLower())
+                {
+                    return DBSkills.Skills[i];
+                }
+            }
+            return null;
+        }
+
+        public static void GiveSkill(DBSkill skill, IUser user)
+        {
+            File.AppendAllText($@"Players\{user.Id}.txt", $"{skill.Name}");
+        }
+
+        public static void GiveSkill(string skillName, IUser user) { GiveSkill(GetSkill(skillName), user); }
+
+        public static DBSkill GetForm(IUser user)
+        {
+            string race = GetAttribute("RACE", user);
+            int form = Convert.ToInt32(GetAttribute("FORM", user));
+            if (race == "Saiyan") return DBSkills.Saiyan_Forms[form];
+            else if (race == "Human") return DBSkills.Human_Forms[form];
+            else if (race == "Namekian") return DBSkills.Namekian_Forms[form];
+            else return null;
+        }
     }
 }

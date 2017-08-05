@@ -6,7 +6,7 @@ namespace ShenronBot
 {
     class DBSkills
     {
-        DBSkill[] Skills = {
+        public static DBSkill[] Skills = {
 
         new DBSkill
         {
@@ -67,7 +67,6 @@ namespace ShenronBot
         new DBSkill
         {
             Name = "Instant Transimission",
-            Power = 0,
             EnergyCost = 10,
             Charge = 0,
             Human = true,
@@ -104,7 +103,6 @@ namespace ShenronBot
         new DBSkill
         {
             Name = "Power Ball",
-            Power = 0,
             EnergyCost = 10,
             Charge = 4,
             Saiyan = true,
@@ -114,7 +112,6 @@ namespace ShenronBot
         new DBSkill
         {
             Name = "After Image",
-            Power = 0,
             EnergyCost = 2,
             Saiyan = true,
             Human = true,
@@ -125,32 +122,43 @@ namespace ShenronBot
         new DBSkill
         {
             Name = "Kaioken",
-            Power = 0,
+            Power = 10,
             EnergyCost = 1000,
             Saiyan = true,
             Human = true,
             Namekian = true,
-            Special = true
+            Special = true,
+            Role = Constants.Roles.KAIOKEN
         },
 
         new DBSkill
         {
             Name = "Super Saiyan",
-            Power = 0,
+            Power = 50,
             EnergyCost = 500,
             Saiyan = true,
-            Special = true
+            Special = true,
+            Role = Constants.Roles.SUPER
         },
 
         new DBSkill
         {
             Name = "SSGSS",
-            Power = 0,
+            Power = 100,
             EnergyCost = 2000,
             Saiyan = true,
-            Special = true
+            Special = true,
+            Role = Constants.Roles.SSGSS
         },
 
         };
+
+        public static DBSkill Kaioken = DBFuncs.GetSkill("Kaioken");
+        public static DBSkill Super_Saiyan = DBFuncs.GetSkill("Super Saiyan");
+        public static DBSkill SSGSS = DBFuncs.GetSkill("SSGSS");
+
+        public static DBSkill[] Saiyan_Forms = { Kaioken, Super_Saiyan, SSGSS };
+        public static DBSkill[] Human_Forms = { Kaioken, Super_Saiyan, SSGSS };
+        public static DBSkill[] Namekian_Forms = { Kaioken, Super_Saiyan, SSGSS };
     }
 }
