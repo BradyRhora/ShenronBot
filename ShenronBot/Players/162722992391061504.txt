@@ -1,0 +1,9 @@
+johnisdead.exe
+RACE: Saiyan
+POWER_LVL: 10
+MULTIPLIER: 1
+ENERGY: 100
+LEVEL: 1
+EXP: 0
+LOCATION: null
+SKILLS:

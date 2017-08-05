@@ -70,6 +70,7 @@ namespace ShenronBot
             // Hook the MessageReceived Event into our Command Handler
             client.MessageReceived += HandleCommand;
             client.UserJoined += HandleJoin;
+            client.Ready += HandleReady;
             // Discover all of the commands in this assembly and load them.
             await commands.AddModulesAsync(Assembly.GetEntryAssembly());
         }
@@ -115,6 +116,28 @@ namespace ShenronBot
             if (DBFuncs.PlayerRegistered(user)) DBFuncs.LoadRoles(user);
             else reg = " Use `db!register [race]` to register as either a Human, Namekian, or Saiyan.";
             await mChan.SendMessageAsync($"{user.Mention} has entered {user.Guild.Name.Replace("DBZ ", "")}.{reg}");
+        }
+
+        public async Task HandleReady()
+        {
+            try
+            {
+                foreach (IUser user in client.GetGuild(Constants.Guilds.DBZ_EARTH).Users)
+                {
+                    if (DBFuncs.PlayerRegistered(user))
+                    {
+                        if (DBFuncs.GetAttribute("LOCATION", user) != "null")
+                        {
+                            DBFuncs.FindDBUser(user).Location = Convert.ToUInt64(DBFuncs.GetAttribute("LOCATION", user));
+                        }
+                    }
+                }
+
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+            }
         }
     }
 

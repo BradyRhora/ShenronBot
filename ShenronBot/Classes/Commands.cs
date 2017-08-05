@@ -219,7 +219,7 @@ namespace ShenronBot
 
             JEmb.Author.Name = $"{user.Username}'s Status";
             JEmb.ColorStripe = Funcs.GetColour(user, Context.Guild);
-            JEmb.Description = "Health: " + dbUser.Health;
+            JEmb.Description = "Health: " + dbUser.Health + "/" + dbUser.MaxHealth;
 
             await Context.Channel.SendMessageAsync("", embed: JEmb.Build());
 
@@ -240,8 +240,8 @@ namespace ShenronBot
                 int targetRole = rdm.Next(10) + 1 + DBFuncs.GetPowerLVL(user);
 
                 await Context.Channel.SendMessageAsync($"{Context.User.Mention} attacks with a power of {attackerRole}, against {user.Mention}'s defense with power of {targetRole}!");
-                if (attackerRole > targetRole) target.Hurt(Context.Channel, attackerRole);
-                else if (targetRole > attackerRole) attacker.Hurt(Context.Channel, targetRole);
+                if (attackerRole > targetRole) await target.Hurt(Context.Channel, attackerRole);
+                else if (targetRole > attackerRole) await attacker.Hurt(Context.Channel, targetRole);
                 else await Context.Channel.SendMessageAsync("The two collide, but nothing happens.");
             }
             else await Context.Channel.SendMessageAsync("That person is not here.");
@@ -270,9 +270,7 @@ namespace ShenronBot
             }
             else await Context.Channel.SendMessageAsync("That person is not here.");
         }
-
         
-
         [Command("give"), Summary("Gives the specified Dragon Ball to the specified user.")]
         public async Task Give(int ID, IUser user)
         {
@@ -579,9 +577,12 @@ namespace ShenronBot
 
             foreach (DBUser user in Bot.sess.Players)
             {
-                if (Context.Channel.Id == Convert.ToUInt64(DBFuncs.GetAttribute("LOCATION",user.User)) && user.User.Id != Context.User.Id)
-                {
-                    here.Add(user);
+                string location = DBFuncs.GetAttribute("LOCATION", user.User);
+                if (location != "null") {
+                    if (Context.Channel.Id == Convert.ToUInt64(location) && user.User.Id != Context.User.Id)
+                    {
+                        here.Add(user);
+                    }
                 }
             }
 

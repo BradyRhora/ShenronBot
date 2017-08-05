@@ -178,9 +178,11 @@ namespace ShenronBot
                 for (int i = 0; i < 3; i++)
                 {
                     var guild = Bot.client.GetGuild(Constants.Guilds.PLANETS[i]);
-                    var gUser = guild.GetUser(user.Id);
-
-                    await gUser.RemoveRoleAsync(guild.GetRole(planetRoles[i]));
+                    if (guild.Users.Contains(user))
+                    {
+                        var gUser = guild.GetUser(user.Id);
+                        await gUser.RemoveRoleAsync(guild.GetRole(planetRoles[i]));
+                    }
                 }
 
                 planet = planet.ToLower();
@@ -189,15 +191,13 @@ namespace ShenronBot
                 for (int i = 0; i < 3; i++)
                 { 
                     var guild = Bot.client.GetGuild(Constants.Guilds.PLANETS[i]);
-                    var gUser = guild.GetUser(user.Id);
                     if (guild.Name.ToLower().Contains(planet))
                     {
+                        var gUser = guild.GetUser(user.Id);
                         await gUser.AddRoleAsync(guild.GetRole(planetRoles[i]));
                         return $"Moved to planet {guild.Name.Replace("DBZ ","")}";
                     }
-
                 }
-
                 return "Planet not found.";
             }
             return "Player not registered.";
@@ -268,14 +268,6 @@ namespace ShenronBot
 
         public static void GiveSkill(string skillName, IUser user) { GiveSkill(GetSkill(skillName), user); }
 
-        public static DBSkill GetForm(IUser user)
-        {
-            string race = GetAttribute("RACE", user);
-            int form = Convert.ToInt32(GetAttribute("FORM", user));
-            if (race == "Saiyan") return DBSkills.Saiyan_Forms[form];
-            else if (race == "Human") return DBSkills.Human_Forms[form];
-            else if (race == "Namekian") return DBSkills.Namekian_Forms[form];
-            else return null;
-        }
+
     }
 }
