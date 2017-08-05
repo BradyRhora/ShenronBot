@@ -13,5 +13,6 @@ namespace ShenronBot
         public string Dialogue { get; set; }
         public string Response1 { get; set; }
         public string Response2 { get; set; }
+        public DBSkill Skill { get; set; }
     }
 }

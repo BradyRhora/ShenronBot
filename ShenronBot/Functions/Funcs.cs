@@ -40,7 +40,7 @@ namespace ShenronBot
             return false;
         }
 
-        public static async void GiveRole(IRole[] roles, IUser user)
+        public static async void GiveRole(ulong[] roles, IUser user)
         {
             var guilds = Constants.Guilds.PLANETS;
 
@@ -51,9 +51,52 @@ namespace ShenronBot
                 if (await Funcs.InGuild(guild, user))
                 {
                     var gUser = guild.GetUser(user.Id);
-                    await gUser.AddRoleAsync(roles[i]);
+                    await gUser.AddRoleAsync(guild.GetRole(roles[i]));
                 }
             }
+        }
+
+        public static async Task<bool> HasRole(ulong role, IUser user)
+        {
+            var gUser = user as IGuildUser;
+            for (int i = 0; i < 3; i++)
+            {
+                var guild = Bot.client.GetGuild(Constants.Guilds.PLANETS[i]) as IGuild;
+                if ((await guild.GetUsersAsync()).Contains(user))
+                {
+                    if (gUser.RoleIds.Contains(role)) return true;
+                }
+            }
+            return false;
+        }
+
+        public static async Task<bool> HasRole(ulong[] roles, IUser user)
+        {
+            var gUser = user as IGuildUser;
+            for (int i = 0; i < 3; i++)
+            {
+                var guild = Bot.client.GetGuild(Constants.Guilds.PLANETS[i]) as IGuild;
+                if ((await guild.GetUsersAsync()).Contains(user))
+                {
+                    if (gUser.RoleIds.Contains(roles[i])) return true;
+                }
+            }
+
+            return false;
+        }
+
+        public static async void RemoveRole(ulong[] roles, IUser user)
+        {
+            var gUser = user as IGuildUser;
+            for (int i = 0; i < 3; i++)
+            {
+                var guild = Bot.client.GetGuild(Constants.Guilds.PLANETS[i]) as IGuild;
+                if ((await guild.GetUsersAsync()).Contains(user))
+                {
+                    if (gUser.RoleIds.Contains(roles[i])) await gUser.RemoveRoleAsync(guild.GetRole(roles[i]));
+                }
+            }
+            
         }
     }
 }
