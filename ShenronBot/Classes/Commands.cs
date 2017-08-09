@@ -35,6 +35,7 @@ namespace ShenronBot
             }
 
             await Context.User.SendMessageAsync("", embed: emb.Build());
+            await Context.Channel.SendMessageAsync("Commands have been sent to you privately!");
 
         }
 
