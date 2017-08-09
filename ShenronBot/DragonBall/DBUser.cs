@@ -18,6 +18,7 @@ namespace ShenronBot
         public ulong Location { get; set; }
         public int Energy { get; set; }
         public bool Charging { get; set; } = false;
+
         public DBUser(IUser user)
         {
             User = user;

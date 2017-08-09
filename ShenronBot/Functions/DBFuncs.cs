@@ -206,7 +206,8 @@ namespace ShenronBot
         public static Embed Dialogue(DBNPC npc, string dialogue)
         {
             JEmbed JEmb = new JEmbed();
-            JEmb.ThumbnailUrl = $@"DragonBall\Images\{npc.Name}.jpg";
+            //JEmb.ThumbnailUrl = $@"DragonBall\Images\{npc.Name}.jpg";
+            JEmb.ThumbnailUrl = "https://hdwallsbox.com/wallpapers/l/1280x720/61/dragon-ball-z-master-roshi-1280x720-60215.jpg";
             JEmb.Author.Name = npc.Name;
             JEmb.Description = dialogue;
             JEmb.ColorStripe = Constants.Colours.SHENRON_GREEN;

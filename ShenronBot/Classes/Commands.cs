@@ -34,7 +34,7 @@ namespace ShenronBot
                 }));
             }
 
-            await Context.Channel.SendMessageAsync("", embed: emb.Build());
+            await Context.User.SendMessageAsync("", embed: emb.Build());
 
         }
 
@@ -233,16 +233,10 @@ namespace ShenronBot
         {
             DBUser attacker = DBFuncs.FindDBUser(Context.User);
             DBUser target = DBFuncs.FindDBUser(user);
-            Random rdm = new Random();
             if (target.Location == Context.Channel.Id)
             {
-                int attackerRole = rdm.Next(10) + 1 + DBFuncs.GetPowerLVL(Context.User);
-                int targetRole = rdm.Next(10) + 1 + DBFuncs.GetPowerLVL(user);
-
-                await Context.Channel.SendMessageAsync($"{Context.User.Mention} attacks with a power of {attackerRole}, against {user.Mention}'s defense with power of {targetRole}!");
-                if (attackerRole > targetRole) await target.Hurt(Context.Channel, attackerRole);
-                else if (targetRole > attackerRole) await attacker.Hurt(Context.Channel, targetRole);
-                else await Context.Channel.SendMessageAsync("The two collide, but nothing happens.");
+                await Context.Channel.SendMessageAsync($"{Context.User.Mention} attacks {user.Mention} with a power of {DBFuncs.GetPowerLVL(Context.User)}.");
+                await target.Hurt(Context.Channel, DBFuncs.GetPowerLVL(Context.User));
             }
             else await Context.Channel.SendMessageAsync("That person is not here.");
         }
@@ -553,6 +547,10 @@ namespace ShenronBot
 
                             Bot.sess.Players.Add(new DBUser(npc));
                             //AI??
+
+                            npc.Fight(DBFuncs.FindDBUser(Context.User));
+                            
+
 
                         }
                         else if (choice == 2) await Context.Channel.SendMessageAsync("", embed: DBFuncs.Dialogue(npc, npc.Response2));
